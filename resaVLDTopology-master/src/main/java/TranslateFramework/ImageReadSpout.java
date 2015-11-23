@@ -39,27 +39,9 @@ public class ImageReadSpout extends BaseRichSpout {
         if(x<files.length){
             if(files[x].exists()){
                 opencv_core.Mat img = opencv_highgui.imread(path+files[x].getName());
-		String tname = files[x].getName();
-                int pack=0,frame=0;
-                if(tname.contains("PACK_")){
-                    int i=tname.indexOf("PACK_")+5;
-                    int j=i;
-                    while(tname.charAt(i)>='0'&&tname.charAt(i)<='9')i++;
-                    pack = Integer.parseInt(tname.substring(j,i));
-                    tname = tname.substring(0,j-5)+tname.substring(i);
-                }
-                if(tname.contains("FRAME_")){
-                    int i=tname.indexOf("FRAME_")+6;
-                    int j=i;
-                    while(tname.charAt(i)>='0'&&tname.charAt(i)<='9')i++;
-                    frame = Integer.parseInt(tname.substring(j,i));
-                    tname = tname.substring(0,j-6)+tname.substring(i);
-                }
-                collector.emit(new Values(new tool.Serializable.Mat(img), path+tname, pack, frame, 0, 0, 0));
-		x++;
+                collector.emit(new Values(new tool.Serializable.Mat(img), files[x].getName(), 0, 0, 0, 0, 0));
             }
         }
-	try{Thread.sleep(1);}catch(Exception e){}
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer){

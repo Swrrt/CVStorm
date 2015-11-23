@@ -8,6 +8,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_highgui;
+
 import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
@@ -33,7 +34,6 @@ public class VideoFrameSpout extends BaseRichSpout{
         opencv_core.IplImage fkImpage = new opencv_core.IplImage();
         collector = _collector;
         capture = new opencv_highgui.VideoCapture(name);
-	System.out.println(" [  VIDEO SPOUT  ] "+capture+" |||| "+name);
         Last = new opencv_core.Mat[npack];
         pack = 0;
         frame = 0;
@@ -47,8 +47,8 @@ public class VideoFrameSpout extends BaseRichSpout{
         opencv_core.Mat x = new opencv_core.Mat();
         if(video_is_over)return ;
         if(pack==0||frame>=contain){
-            System.out.printf("WOWOWOWOWOW now is pack %d\n",pack);
-            if(!capture.read(x)){video_is_over = true;System.out.println(" !!!!!!!!!! OVER !!!!!!!!\n");return ;}
+            //System.out.printf("WOWOWOWOWOW now is pack %d\n",pack);
+            if(!capture.read(x)){video_is_over = true;return ;}
             if(frame>=contain){
                 Last[frame - contain] = x.clone();
             }

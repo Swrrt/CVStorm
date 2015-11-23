@@ -35,7 +35,8 @@ public class TrajShapeFeatureBolt extends BaseRichBolt {
         for(int i=0;i<feature.size();i++){
             feature.set(i,feature.get(i)/s);
         }
-        collector.emit(new Values(feature,"Shape",tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),tuple.getIntegerByField("Scale"),tuple.getIntegerByField("sPatch")));
+        collector.ack(tuple);
+        collector.emit(tuple,new Values(feature,"Shape",tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),tuple.getIntegerByField("Scale"),tuple.getIntegerByField("sPatch")));
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){

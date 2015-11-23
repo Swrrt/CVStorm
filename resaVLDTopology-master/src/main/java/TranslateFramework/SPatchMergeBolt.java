@@ -35,7 +35,7 @@ public class SPatchMergeBolt extends BaseRichBolt {
     public void execute(Tuple tuple){
         Pair<String,Pair<Integer,Pair<Integer,Pair<Integer,Integer>>>> key = new Pair(tuple.getStringByField("Filename"),new Pair(tuple.getIntegerByField("Pack"),new Pair(tuple.getIntegerByField("Frame"),new Pair(tuple.getIntegerByField("Patch"),tuple.getIntegerByField("Scale")))));
         if(over.contains(key)){
-            return ;
+            collector.ack(tuple);return ;
         }
         zzz++;
         if(!featuretable.containsKey(key)){
@@ -52,8 +52,9 @@ public class SPatchMergeBolt extends BaseRichBolt {
             }
             featuretable.remove(key);
             //System.out.println("[ SPMatch ]"+tuple.getIntegerByField("Pack")+" "+features);
-            collector.emit(new Values(features,tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"),0));
+            collector.emit(tuple,new Values(features,tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"),0));
         }
+        collector.ack(tuple);
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){

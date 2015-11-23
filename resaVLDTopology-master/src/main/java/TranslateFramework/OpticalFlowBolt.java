@@ -19,10 +19,6 @@ import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
 import java.util.*;
 
-import static org.bytedeco.javacpp.opencv_core.IPL_DEPTH_32F;
-import static org.bytedeco.javacpp.opencv_core.cvCreateImage;
-import static org.bytedeco.javacpp.opencv_core.cvGetSize;
-
 public class OpticalFlowBolt extends BaseRichBolt {
     OutputCollector collector;
     Map<Pair<String,Pair<Integer,Pair<Integer,Pair<Integer,Pair<Integer,Integer>>>>>,Pair<opencv_core.Mat,Long>> bufferl,buffern;  /* The Long has some potential problem */
@@ -53,11 +49,11 @@ public class OpticalFlowBolt extends BaseRichBolt {
     public void execute(Tuple tuple) {
         opencv_core.IplImage fkImpage = new opencv_core.IplImage();
         /*  Buffering */
-        opencv_core.Mat x = ((tool.Serializable.Mat)tuple.getValueByField("Image0")).toJavaCVMat(),y = ((tool.Serializable.Mat)tuple.getValueByField("Image1")).toJavaCVMat();
+        opencv_core.Mat x = ((tool.Serializable.Mat)tuple.getValueByField("Image")).toJavaCVMat(),y;
         Double [][] Vx = new Double [x.rows()][x.cols()],Vy = new Double[x.rows()][x.cols()];
         String filename = tuple.getStringByField("Filename");
         int pack = tuple.getIntegerByField("Pack"),frame = tuple.getIntegerByField("Frame"),patch = tuple.getIntegerByField("Patch"),scale = tuple.getIntegerByField("Scale"),sPatch = tuple.getIntegerByField("sPatch");
-        /*Pair<String,Pair<Integer,Pair<Integer,Pair<Integer,Pair<Integer,Integer>>>>> last = new Pair<>(filename, new Pair<>(pack, new Pair<>(frame-1,new Pair<>(patch,new Pair<>(scale, sPatch)))));
+        Pair<String,Pair<Integer,Pair<Integer,Pair<Integer,Pair<Integer,Integer>>>>> last = new Pair<>(filename, new Pair<>(pack, new Pair<>(frame-1,new Pair<>(patch,new Pair<>(scale, sPatch)))));
         Pair<String,Pair<Integer,Pair<Integer,Pair<Integer,Pair<Integer,Integer>>>>> next = new Pair<>(filename, new Pair<>(pack, new Pair<>(frame+1,new Pair<>(patch,new Pair<>(scale, sPatch)))));
         Pair<String,Pair<Integer,Pair<Integer,Pair<Integer,Pair<Integer,Integer>>>>> now = new Pair<>(filename, new Pair<>(pack, new Pair<>(frame,new Pair<>(patch,new Pair<>(scale, sPatch)))));
         boolean fl = false;
@@ -95,23 +91,15 @@ public class OpticalFlowBolt extends BaseRichBolt {
             }
             bufferl.put(now,new Pair<>(x,n));
             queuel.put(n,now);
-        }*/
-        CVOpticalFlow(x,y,Vx,Vy);
-        collector.emit(new Values(new tool.Serializable.Mat(x), filename, pack, frame, patch, scale, sPatch, Vx, Vy));
+        }
+        collector.ack(tuple);
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){
         declarer.declare(new Fields("Image", "Filename", "Pack", "Frame", "Patch", "Scale", "sPatch", "OFx", "OFy"));
     }
     public void CVOpticalFlow(opencv_core.Mat img, opencv_core.Mat oimg, Double[][] Vx, Double[][] Vy){
-        opencv_core.Mat t=new opencv_core.Mat(),gimg = new opencv_core.Mat(),goimg= new opencv_core.Mat();
-        opencv_imgproc.cvtColor(img, gimg, opencv_imgproc.COLOR_BGR2GRAY);
-        opencv_imgproc.cvtColor(oimg, goimg, opencv_imgproc.COLOR_BGR2GRAY);
-        opencv_core.IplImage flow = cvCreateImage(gimg.cvSize(), IPL_DEPTH_32F, 2);
-        t= new opencv_core.Mat(flow);
-        opencv_video.calcOpticalFlowFarneback(gimg,goimg, t,
-                Math.sqrt(2.0) / 2.0, 5, 10, 2, 7, 1.5, opencv_video.OPTFLOW_FARNEBACK_GAUSSIAN);
-        /*opencv_video.DenseOpticalFlow ofl = opencv_video.createOptFlow_DualTVL1();
+        opencv_video.DenseOpticalFlow ofl = opencv_video.createOptFlow_DualTVL1();
         opencv_core.Mat t=new opencv_core.Mat(),gimg = new opencv_core.Mat(),goimg= new opencv_core.Mat();
         opencv_imgproc.cvtColor(img, gimg, opencv_imgproc.COLOR_BGR2GRAY);
         opencv_imgproc.cvtColor(oimg, goimg, opencv_imgproc.COLOR_BGR2GRAY);
@@ -121,7 +109,6 @@ public class OpticalFlowBolt extends BaseRichBolt {
         ofl.calc(gimg, goimg, t);
         //System.out.println(" OF " + t.rows() + " " + t.cols());
         //System.out.println(" OF!"+gimg.rows()+" "+gimg.cols());
-        */
         FloatBuffer in = t.getFloatBuffer();
         for(int i=0;i<t.rows();i++)
             for(int j=0;j<t.cols();j++){

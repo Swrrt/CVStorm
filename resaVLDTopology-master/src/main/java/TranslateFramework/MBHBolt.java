@@ -132,7 +132,8 @@ public class MBHBolt extends BaseRichBolt{
                 //collector.emit(tuple, new Values(feature, "MBH", tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"), tuple.getIntegerByField("sPatch")));
             }
         }
-        collector.emit(new Values(feature, "MBH", tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"), tuple.getIntegerByField("sPatch")));
+        collector.emit(tuple, new Values(feature, "MBH", tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"), tuple.getIntegerByField("sPatch")));
+        collector.ack(tuple);
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){

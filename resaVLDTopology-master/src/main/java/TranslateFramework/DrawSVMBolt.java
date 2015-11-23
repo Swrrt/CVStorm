@@ -8,6 +8,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
 import javafx.util.Pair;
+import logodetection.Util;
 import org.bytedeco.javacpp.opencv_core;
 import tool.Serializable;
 
@@ -85,6 +86,7 @@ public class DrawSVMBolt extends BaseRichBolt {
             y0 = img.rows() - img.cols() / 8;
             y1 = img.rows() ;
         }
+        Util.drawRectOnMat(new opencv_core.Rect(x0,y0,x1-x0,y1-y0),timg,opencv_core.CV_RGB(256,0,0));
         opencv_core.putText(timg,"Class : "+String.valueOf(c),new opencv_core.Point(x0+10,y0+20),opencv_core.CV_FONT_HERSHEY_PLAIN,1,new opencv_core.Scalar(opencv_core.CV_RGB(256,0,0)));
         return timg;
     }

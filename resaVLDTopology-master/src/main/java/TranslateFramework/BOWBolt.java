@@ -50,20 +50,17 @@ public class BOWBolt extends BaseRichBolt{
     @Override
     public void execute(Tuple tuple){
         List<List<Double>> features = (List<List<Double>>)tuple.getValueByField("Features");
-	
         double[] a = new double[n];
         double ss=0;
-	double[] fbi = new double[dim];
-        //System.out.println(" BOW !!!");
+        System.out.println(" BOW !!!");
         for(int i=0;i<features.size();i++){
-	    for(int j=0;j<dim;j++)fbi[j]=features.get(i).get(j);
             int mini=0;
-            //System.out.println("!!!!! "+String.valueOf(i));
+            System.out.println("!!!!! "+String.valueOf(i));
             double min = 1e100;
             for(int j=0;j<n;j++){
                 double s=0;
                 for(int k=0;k<dim;k++){
-                    s+=(fbi[k]-dict[j][k])*(fbi[k]-dict[j][k]);
+                    s+=(features.get(i).get(k)-dict[j][k])*(features.get(i).get(k)-dict[j][k]);
                 }
                 if(s<min){
                     min=s;
@@ -79,7 +76,8 @@ public class BOWBolt extends BaseRichBolt{
             a[i]/=ss;
             feature.add(a[i]);
         }
-        collector.emit(new Values(feature,"BOW_"+name,tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),tuple.getIntegerByField("Scale"),tuple.getIntegerByField("sPatch")));
+        collector.emit(tuple,new Values(feature,"BOW_"+name,tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),tuple.getIntegerByField("Scale"),tuple.getIntegerByField("sPatch")));
+        collector.ack(tuple);
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){

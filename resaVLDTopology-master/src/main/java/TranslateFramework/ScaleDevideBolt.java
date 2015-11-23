@@ -31,11 +31,12 @@ public class ScaleDevideBolt extends BaseRichBolt {
     }
     @Override
     public void execute(Tuple tuple){
+        collector.ack(tuple);
         opencv_core.Mat img = ((Serializable.Mat)tuple.getValueByField("Image")).toJavaCVMat(),timg = new opencv_core.Mat();
         int w=img.cols(),h=img.rows();
         for(int i=0;i<number;i++){
             opencv_imgproc.resize(img, timg, new opencv_core.Size(w, h));
-            collector.emit(new Values(new Serializable.Mat(timg),tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),i,tuple.getIntegerByField("sPatch")));
+            collector.emit(tuple,new Values(new Serializable.Mat(timg),tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),i,tuple.getIntegerByField("sPatch")));
             double tw = w/ratio,th = h/ratio;
             w = (int)Math.round(tw);
             h = (int)Math.round(th);
@@ -43,6 +44,7 @@ public class ScaleDevideBolt extends BaseRichBolt {
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){
+        opencv_core.IplImage fkImpage = new opencv_core.IplImage();
         declarer.declare(new Fields("Image","Filename","Pack","Frame","Patch","Scale","sPatch"));
     }
 }

@@ -47,15 +47,10 @@ public class HOGBolt extends BaseRichBolt{
         List<Double> output = new ArrayList<>();
         List<List<Double>> feature = new ArrayList<>();
         List<Double> A = new ArrayList<>();
-	
-        double[][] gradx = null, grady = null;
         for(int tt=0;tt<simgs.size();tt++) {
             opencv_core.Mat img = simgs.get(tt).toJavaCVMat(), gimg = new opencv_core.Mat();
-	    if(gradx==null){
-		gradx = new double[img.rows()][img.cols()-2];
-		grady = new double[img.rows()-2][img.cols()];
-	    }
             opencv_imgproc.cvtColor(img, gimg, opencv_imgproc.CV_BGR2GRAY);
+            double[][] gradx = new double[img.rows()][img.cols() - 2], grady = new double[img.rows() - 2][img.cols()];
             //System.out.println(" first ");
             for (int i = 0; i < img.rows(); i++) {
                 for (int j = 0; j < img.cols(); j++) {
@@ -70,9 +65,9 @@ public class HOGBolt extends BaseRichBolt{
             //System.out.println(" second ");
             if (!ispatch) {
                 int ti=0;
-		double[] vote = new double[nbin];
                 for (int i = 0; i < (img.rows() - 2) / ncell; i++) {
                     for (int j = 0; j < (img.cols() - 2) / ncell; j++) {
+                        double[] vote = new double[nbin];
                         A = new ArrayList<>();
                         for (int t1 = 0; t1 < nbin; t1++)
                             vote[t1] = 0;
@@ -123,7 +118,6 @@ public class HOGBolt extends BaseRichBolt{
                 //List<Double> A = new ArrayList<>();
                 for (int t1 = 0; t1 < nbin; t1++)
                     vote[t1] = 0;
-		double s=0;
                 for (int x = 1; x <= ncell; x++) {
                     for (int y = 1; y <= ncell; y++) {
                         //System.out.printf("[ yoyo ] %d %d %d %d %d %d\n" ,img.rows(),img.cols(),i,j,x,y);
@@ -133,9 +127,12 @@ public class HOGBolt extends BaseRichBolt{
                         while (angle < 0) angle += 2 * Math.PI;
                         while (angle > 2 * Math.PI) angle -= 2 * Math.PI;
                         vote[(int) (angle * nbin / (Math.PI * 2))] += grad;
-			s+=grad;
                         //System.out.printf("[ yoyo ] %d %d %d %d %d %d\n" ,img.rows(),img.cols(),i,j,x,y);
                     }
+                }
+                double s = 0;
+                for (int k = 0; k < nbin; k++) {
+                    s += vote[k];
                 }
                 if (s == 0) s = 1;
                 for (int k = 0; k < nbin; k++) {
@@ -147,7 +144,8 @@ public class HOGBolt extends BaseRichBolt{
             }
 
         }
-        if(ispatch)collector.emit(new Values(A,"HOG",tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),tuple.getIntegerByField("Scale"),tuple.getIntegerByField("sPatch")));
+        if(ispatch)collector.emit(tuple,new Values(A,"HOG",tuple.getStringByField("Filename"),tuple.getIntegerByField("Pack"),tuple.getIntegerByField("Frame"),tuple.getIntegerByField("Patch"),tuple.getIntegerByField("Scale"),tuple.getIntegerByField("sPatch")));
+        collector.ack(tuple);
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){

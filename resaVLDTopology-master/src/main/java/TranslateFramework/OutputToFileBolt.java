@@ -30,7 +30,7 @@ public class OutputToFileBolt extends BaseRichBolt {
         collector.ack(tuple);
         String name = tuple.getStringByField("Filename");
         int i=name.length()-1;
-        while(i>=0&&name.charAt(i)!='/')i--;
+        while(i>=0&&name.charAt(i)!='\\')i--;
         if(i>=0){
             name = name.substring(i+1,name.length());
         }
@@ -66,7 +66,6 @@ public class OutputToFileBolt extends BaseRichBolt {
                 writer.flush();
                 writer.close();
             } catch (Exception e) {
-		System.out.println(e);
             }
         }
     }

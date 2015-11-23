@@ -58,6 +58,7 @@ public class DenseTrajectBolt extends BaseRichBolt {
             queue.remove(x);
             queue.put(n, new Pair<>(filename, new Pair<>(pack, new Pair<>(patch, new Pair(scale, sPatch)))));
             buffer.put(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch)))),new Pair<>(buffer.get(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch))))).getKey(),n));       /*  Holy Sh*t! */
+            collector.ack(tuple);
         }else{
             if(!queue.entrySet().isEmpty()&&n-queue.entrySet().iterator().next().getKey()>Maxn){
                 buffer.remove(queue.entrySet().iterator().next().getValue());
@@ -66,11 +67,12 @@ public class DenseTrajectBolt extends BaseRichBolt {
             buffer.put(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch)))),new Pair<>(new TreeMap<>(),n));
             buffer.get(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch))))).getKey().put(frame, new Pair<>(new Pair<>(Vx, Vy), img));
             queue.put(n, new Pair<>(filename, new Pair<>(pack, new Pair<>(patch, new Pair(scale, sPatch)))));
+            collector.ack(tuple);
         }
         //System.out.printf(" Dense:  %d pack, %d frame , %d\n",pack,frame,buffer.get(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch))))).getKey().size());
         n = n+1;
         if(buffer.get(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch))))).getKey().size() == npack) {
-        //    System.out.println("YEYEYE!");
+            System.out.println("YEYEYE!");
             Map<Integer, Pair<Pair<Double[][], Double[][]>, opencv_core.Mat>> bb = buffer.get(new Pair<>(filename, new Pair<>(pack, new Pair<>(patch, new Pair(scale, sPatch))))).getKey();
             opencv_core.Mat[] x = new opencv_core.Mat[npack];
             List<List<Double>> px = new ArrayList<>(), py = new ArrayList<>();
@@ -97,19 +99,13 @@ public class DenseTrajectBolt extends BaseRichBolt {
                 }
             px.add(tpx);
             py.add(tpy);
+
             List<tool.Serializable.Mat> images = new ArrayList<>();
             tmp = new Values();
             isFirst = true;
             List<Double[][]> OFxs = new ArrayList<>(), OFys = new ArrayList<>();
             List<Double> Xs = new ArrayList<>(),Ys =new ArrayList<>();
-	    Double[][][] Vxii = new Double[npack][][], Vyii = new Double[npack][][];
-            for(int j=0;j<npack;j++){
-		x[j] = bb.get(j).getValue();
-		Vxii[j] = bb.get(j).getKey().getKey();
-		Vyii[j] = bb.get(j).getKey().getValue();
-	    }
-            Double[][] ofx = new Double[traj_side*2+1][traj_side*2+1], ofy = new Double[traj_side*2+1][traj_side*2+1];
-
+            for(int j=0;j<npack;j++)x[j]= bb.get(j).getValue();
             for(int i=0;i<tpx.size();i++){
                 //System.out.printf("SOMETHING???? %d\n",i);
                 images = new ArrayList<>();
@@ -120,35 +116,36 @@ public class DenseTrajectBolt extends BaseRichBolt {
                 double txx = tpx.get(i),tyy = tpy.get(i);
                 //int tx = (int)Math.round(tpx.get(i)), ty = (int)Math.round(tpy.get(i));
                 for(int j=0;j<npack;j++){
-                    opencv_core.Mat timg = x[j].clone();
-//                    Vx = Vxii[j];
-//                    Vy = Vyii[j];
+                    opencv_core.Mat timg = bb.get(j).getValue();
+                    Vx = bb.get(j).getKey().getKey();
+                    Vy = bb.get(j).getKey().getValue();
                     double dx = 0, dy = 0;
                     int sx=0,sy=0;
                     for(int xx = (int)txx - median_side;xx <= (int)txx+median_side ;xx++)
                         for(int yy = (int)tyy - median_side;yy <= (int)tyy+median_side ;yy++)
-                            if (xx >= 0 && xx < x[0].cols() && yy >= 0 && yy < x[0].rows() && Vxii[j][yy][xx] * Vxii[j][yy][xx] + Vyii[j][yy][xx] * Vyii[j][yy][xx] < 100) {
-                                dx+=Vxii[j][yy][xx];
-                                dy+=Vyii[j][yy][xx];
+                            if (xx >= 0 && xx < x[0].cols() && yy >= 0 && yy < x[0].rows() && Vx[yy][xx] * Vx[yy][xx] + Vy[yy][xx] * Vy[yy][xx] < 100) {
+                                dx+=Vx[yy][xx];
+                                dy+=Vy[yy][xx];
                                 sx++;
                                 sy++;
                             }
                     dx/=sx;
                     dy/=sy;
-/*                    if((int)(txx+dx)>=traj_side&&(int)(txx+dx)<timg.cols()-traj_side&&(int)(tyy+dy)>=traj_side&&(int)(tyy+dy)<timg.rows()-traj_side){
+                    if((int)(txx+dx)>=traj_side&&(int)(txx+dx)<timg.cols()-traj_side&&(int)(tyy+dy)>=traj_side&&(int)(tyy+dy)<timg.rows()-traj_side){
                         for(int k=j;k<npack;k++){
                             opencv_core.line(x[k], new opencv_core.Point((int) (txx), (int) (tyy)), new opencv_core.Point((int) (txx+dx), (int) (tyy+dy)), new opencv_core.Scalar(opencv_core.CV_RGB(255 * (14 + j - k) / 14, 0, 0)));
                         }
-                    }*/
+                    }
                     txx += dx;
                     tyy += dy;
                     if(txx>=traj_side&&txx<timg.cols()-traj_side&&tyy>=traj_side&&tyy<timg.rows()-traj_side){
+                        Double[][] ofx = new Double[traj_side*2+1][traj_side*2+1], ofy = new Double[traj_side*2+1][traj_side*2+1];
                         opencv_core.Mat ttimg = new opencv_core.Mat();
                         ttimg = timg.apply(new opencv_core.Rect((int)txx - traj_side, (int)tyy - traj_side, traj_side * 2+1, traj_side * 2+1)).clone();
                         for(int xx = (int)txx - traj_side; xx<= (int) txx +traj_side; xx++){
                             for(int yy = (int)tyy - traj_side; yy<= (int) tyy +traj_side; yy++){
-                                ofx[yy-(int)tyy+traj_side][xx-(int)txx+traj_side] = Vxii[j][yy][xx];
-                                ofy[yy-(int)tyy+traj_side][xx-(int)txx+traj_side] = Vyii[j][yy][xx];
+                                ofx[yy-(int)tyy+traj_side][xx-(int)txx+traj_side] = Vx[yy][xx];
+                                ofy[yy-(int)tyy+traj_side][xx-(int)txx+traj_side] = Vy[yy][xx];
                             }
                         }
                         images.add(new tool.Serializable.Mat(ttimg));
@@ -170,13 +167,13 @@ public class DenseTrajectBolt extends BaseRichBolt {
                 tmp.set(tmp.size()-1,true);
                 collector.emit(tmp);
             }
-            /*for(int j=0;j<npack;j++){
+            for(int j=0;j<npack;j++){
                 String name = tuple.getStringByField("Filename");
                 int pp = name.length()-1;
                 while(pp>=0&&name.charAt(pp)!='\\')pp--;
                 System.out.println(name.substring(0, pp) + "\\output\\" + name.substring(pp + 1, name.length() - 4) + "_" + String.valueOf(tuple.getIntegerByField("Pack")) + "_" + String.valueOf(tuple.getIntegerByField("Patch")) + "_" + String.valueOf(tuple.getIntegerByField("Scale"))+"_"+String.valueOf(j) + ".jpg");
                 opencv_highgui.imwrite(name.substring(0, pp) + "\\output\\" + name.substring(pp + 1, name.length() - 4) + "_" + String.valueOf(tuple.getIntegerByField("Pack")) + "_" + String.valueOf(tuple.getIntegerByField("Patch")) + "_" + String.valueOf(tuple.getIntegerByField("Scale"))+"_"+String.valueOf(j) + ".jpg",x[j]);
-            }*/
+            }
             /*for (int i = 0; i < npack; i++) {
                 //Double [][] Vx = new Double[x[0].rows()][x[0].cols()],Vy = new Double[x[0].rows()][x[0].cols()];
                 x[i] = bb.get(i).getValue();

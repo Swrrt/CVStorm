@@ -49,6 +49,7 @@ public class HOFBolt extends BaseRichBolt{
             Vys = new ArrayList<>();
             Vys.add((Double[][])tuple.getValueByField("OFy"));
         }
+        collector.ack(tuple);
         List<Double> feature = new ArrayList<>();
         List<List<Double>> HOF = new ArrayList<>();
 
@@ -111,7 +112,7 @@ public class HOFBolt extends BaseRichBolt{
                 //collector.emit(tuple, new Values(feature, "HOF", tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"), tuple.getIntegerByField("sPatch")));
             }
         }
-        collector.emit(new Values(feature, "HOF", tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"), tuple.getIntegerByField("sPatch")));
+        collector.emit(tuple, new Values(feature, "HOF", tuple.getStringByField("Filename"), tuple.getIntegerByField("Pack"), tuple.getIntegerByField("Frame"), tuple.getIntegerByField("Patch"), tuple.getIntegerByField("Scale"), tuple.getIntegerByField("sPatch")));
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer){

@@ -7,6 +7,7 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import logodetection.Debug;
 import org.bytedeco.javacpp.opencv_core;
 import tool.Serializable;
 
