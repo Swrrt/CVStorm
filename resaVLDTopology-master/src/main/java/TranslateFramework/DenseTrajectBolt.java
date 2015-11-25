@@ -105,6 +105,7 @@ public class DenseTrajectBolt extends BaseRichBolt {
             isFirst = true;
             List<Double[][]> OFxs = new ArrayList<>(), OFys = new ArrayList<>();
             List<Double> Xs = new ArrayList<>(),Ys =new ArrayList<>();
+	    
             for(int j=0;j<npack;j++)x[j]= bb.get(j).getValue();
             for(int i=0;i<tpx.size();i++){
                 //System.out.printf("SOMETHING???? %d\n",i);
@@ -131,11 +132,11 @@ public class DenseTrajectBolt extends BaseRichBolt {
                             }
                     dx/=sx;
                     dy/=sy;
-                    if((int)(txx+dx)>=traj_side&&(int)(txx+dx)<timg.cols()-traj_side&&(int)(tyy+dy)>=traj_side&&(int)(tyy+dy)<timg.rows()-traj_side){
+/*                    if((int)(txx+dx)>=traj_side&&(int)(txx+dx)<timg.cols()-traj_side&&(int)(tyy+dy)>=traj_side&&(int)(tyy+dy)<timg.rows()-traj_side){
                         for(int k=j;k<npack;k++){
                             opencv_core.line(x[k], new opencv_core.Point((int) (txx), (int) (tyy)), new opencv_core.Point((int) (txx+dx), (int) (tyy+dy)), new opencv_core.Scalar(opencv_core.CV_RGB(255 * (14 + j - k) / 14, 0, 0)));
                         }
-                    }
+                    }*/
                     txx += dx;
                     tyy += dy;
                     if(txx>=traj_side&&txx<timg.cols()-traj_side&&tyy>=traj_side&&tyy<timg.rows()-traj_side){
@@ -167,13 +168,13 @@ public class DenseTrajectBolt extends BaseRichBolt {
                 tmp.set(tmp.size()-1,true);
                 collector.emit(tmp);
             }
-            for(int j=0;j<npack;j++){
+/*            for(int j=0;j<npack;j++){
                 String name = tuple.getStringByField("Filename");
                 int pp = name.length()-1;
                 while(pp>=0&&name.charAt(pp)!='\\')pp--;
                 System.out.println(name.substring(0, pp) + "\\output\\" + name.substring(pp + 1, name.length() - 4) + "_" + String.valueOf(tuple.getIntegerByField("Pack")) + "_" + String.valueOf(tuple.getIntegerByField("Patch")) + "_" + String.valueOf(tuple.getIntegerByField("Scale"))+"_"+String.valueOf(j) + ".jpg");
                 opencv_highgui.imwrite(name.substring(0, pp) + "\\output\\" + name.substring(pp + 1, name.length() - 4) + "_" + String.valueOf(tuple.getIntegerByField("Pack")) + "_" + String.valueOf(tuple.getIntegerByField("Patch")) + "_" + String.valueOf(tuple.getIntegerByField("Scale"))+"_"+String.valueOf(j) + ".jpg",x[j]);
-            }
+            }*/
             /*for (int i = 0; i < npack; i++) {
                 //Double [][] Vx = new Double[x[0].rows()][x[0].cols()],Vy = new Double[x[0].rows()][x[0].cols()];
                 x[i] = bb.get(i).getValue();
