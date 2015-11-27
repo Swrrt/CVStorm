@@ -50,12 +50,13 @@ public class FeatureMergeBolt extends BaseRichBolt {
         }
         hash*=10;
         hash+=x.length();
-        if(ppp.containsKey(x))return ppp.get(x);
+        /*if(ppp.containsKey(x))return ppp.get(x);
         else {
             pps++;
             ppp.put(x,pps);
             return pps;
-        }
+        }*/
+	return hash;
     }
     @Override
     public void execute(Tuple tuple) {

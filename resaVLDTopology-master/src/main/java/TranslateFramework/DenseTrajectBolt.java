@@ -51,6 +51,7 @@ public class DenseTrajectBolt extends BaseRichBolt {
         //System.out.println("DENSE is here!!!"+String.valueOf(n));
         int pack = tuple.getIntegerByField("Pack"),frame = tuple.getIntegerByField("Frame"), patch = tuple.getIntegerByField("Patch"), scale = tuple.getIntegerByField("Scale"), sPatch = tuple.getIntegerByField("sPatch");
         Double [][] Vx = (Double[][])tuple.getValueByField("OFx"),Vy = (Double[][])tuple.getValueByField("OFy");
+	if(sPatch>=npack)return ;
         /* Buffer with LRU policy */
         if(buffer.containsKey(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch)))))){
             buffer.get(new Pair<>(filename,new Pair<>(pack,new Pair<>(patch,new Pair(scale,sPatch))))).getKey().put(frame, new Pair<>(new Pair<>(Vx, Vy), img));

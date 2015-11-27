@@ -50,7 +50,7 @@ System.out.println(" [ Redis Spout ] "+name);
 	}catch(Exception e){}
 	}else if(frameId%90==0){
 	try{
-		Thread.sleep(12000);
+		Thread.sleep(15000);
 	}catch(Exception e){}
 	}
     }
