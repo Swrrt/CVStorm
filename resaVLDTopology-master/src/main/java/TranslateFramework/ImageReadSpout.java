@@ -41,6 +41,7 @@ public class ImageReadSpout extends BaseRichSpout {
                 opencv_core.Mat img = opencv_highgui.imread(path+files[x].getName());
                 collector.emit(new Values(new tool.Serializable.Mat(img), files[x].getName(), 0, 0, 0, 0, 0));
             }
+	    x++;
         }
     }
     @Override
