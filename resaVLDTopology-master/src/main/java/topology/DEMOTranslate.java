@@ -817,7 +817,7 @@ public class DEMOTranslate {
         conf.setMaxSpoutPending(2);
         conf.setMessageTimeoutSecs(120000);
         if (args!=null && args.length > 1){
-            conf.setNumWorkers(24);
+            conf.setNumWorkers(40);
             StormSubmitter.submitTopology(args[1], conf, builder.createTopology());
         }else{
             conf.setMaxTaskParallelism(3);

@@ -40,7 +40,8 @@ public class ImageReadSpout extends BaseRichSpout {
             if(files[x].exists()){
                 opencv_core.Mat img = opencv_highgui.imread(path+files[x].getName());
 		String tname = files[x].getName();
-                int pack=0,frame=0;
+                int pack=0,frame=0,patch=0,scale=0,spatch=0,len = tname.length();
+		/* For different image filename module */
                 if(tname.contains("PACK_")){
                     int i=tname.indexOf("PACK_")+5;
                     int j=i;
@@ -55,11 +56,37 @@ public class ImageReadSpout extends BaseRichSpout {
                     frame = Integer.parseInt(tname.substring(j,i));
                     tname = tname.substring(0,j-6)+tname.substring(i);
                 }
-                collector.emit(new Values(new tool.Serializable.Mat(img), path+tname, pack, frame, 0, 0, 0));
+		/* new */
+		if(len>0){
+		    int i = len - 5;
+                    int j = i+1;
+		    while(i>=0&&tname.charAt(i)>='0'&&tname.charAt(i)<='9')i--;
+		    if(i>=5&&tname.charAt(i)=='_'){
+			spatch = Integer.parseInt(tname.substring(i+1,j));
+			j=i;
+			i--;
+			while(i>=0&&tname.charAt(i)>='0'&&tname.charAt(i)<='9')i--;
+			scale = Integer.parseInt(tname.substring(i+1,j));
+			j=i;
+			i--;
+			while(i>=0&&tname.charAt(i)>='0'&&tname.charAt(i)<='9')i--;
+			patch = Integer.parseInt(tname.substring(i+1,j));
+			j=i;
+			i--;
+			while(i>=0&&tname.charAt(i)>='0'&&tname.charAt(i)<='9')i--;
+			frame = Integer.parseInt(tname.substring(i+1,j));
+			j=i;
+			i--;
+			while(i>=0&&tname.charAt(i)>='0'&&tname.charAt(i)<='9')i--;
+			pack = Integer.parseInt(tname.substring(i+1,j));
+		    }
+		    
+		}
+                collector.emit(new Values(new tool.Serializable.Mat(img), path+tname, pack, frame, patch, scale, spatch));
 		x++;
             }
         }
-	if(x%90==0)try{Thread.sleep(3000);}catch(Exception e){}
+	if(x%90==0)try{Thread.sleep(6000);}catch(Exception e){}
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer){
