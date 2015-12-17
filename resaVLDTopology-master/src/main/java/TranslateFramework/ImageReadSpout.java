@@ -61,7 +61,7 @@ public class ImageReadSpout extends BaseRichSpout {
 		    int i = len - 5;
                     int j = i+1;
 		    while(i>=0&&tname.charAt(i)>='0'&&tname.charAt(i)<='9')i--;
-		    if(i>=5&&tname.charAt(i)=='_'){
+		    if(i>=3&&tname.charAt(i)=='_'){
 			spatch = Integer.parseInt(tname.substring(i+1,j));
 			j=i;
 			i--;
@@ -79,10 +79,12 @@ public class ImageReadSpout extends BaseRichSpout {
 			i--;
 			while(i>=0&&tname.charAt(i)>='0'&&tname.charAt(i)<='9')i--;
 			pack = Integer.parseInt(tname.substring(i+1,j));
+			tname = tname.substring(0,i+1);
 		    }
 		    
 		}
-                collector.emit(new Values(new tool.Serializable.Mat(img), path+tname, pack, frame, patch, scale, spatch));
+		System.out.println(" tname is ["+tname+"]"+" "+String.valueOf(frame)+" "+String.valueOf(pack));
+                collector.emit(new Values(new tool.Serializable.Mat(img), path+tname, pack, frame, 0, 0, 0));
 		x++;
             }
         }
