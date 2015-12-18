@@ -14,7 +14,9 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.Collections;
+import java.util.Arrays;
+import java.util.Comparator;
 /**
  * Created by swrrt on 23/9/2015.
  */
@@ -32,6 +34,12 @@ public class ImageReadSpout extends BaseRichSpout {
         collector = _collector;
 
         files = (new File(path)).listFiles();
+	Collections.sort(Arrays.asList(files),new Comparator<File>(){
+		@Override
+		public int compare(File f1, File f2){
+			return f1.getName().compareTo(f2.getName());
+		}
+	});
         x=0;
     }
     @Override
@@ -83,12 +91,11 @@ public class ImageReadSpout extends BaseRichSpout {
 		    }
 		    
 		}
-		System.out.println(" tname is ["+tname+"]"+" "+String.valueOf(frame)+" "+String.valueOf(pack));
                 collector.emit(new Values(new tool.Serializable.Mat(img), path+tname, pack, frame, 0, 0, 0));
 		x++;
             }
         }
-	if(x%90==0)try{Thread.sleep(6000);}catch(Exception e){}
+	if(x%45==0)try{Thread.sleep(4000);}catch(Exception e){}
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer){
