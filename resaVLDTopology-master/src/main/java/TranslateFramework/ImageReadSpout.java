@@ -95,7 +95,7 @@ public class ImageReadSpout extends BaseRichSpout {
 		x++;
             }
         }
-	if(x%45==0)try{Thread.sleep(4000);}catch(Exception e){}
+	if(x%45==0)try{Thread.sleep(6000);}catch(Exception e){}
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer){

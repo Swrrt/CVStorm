@@ -43,7 +43,6 @@ public class ScaleMergeBolt extends BaseRichBolt {
         }
         buffer.get(key).put(tuple.getIntegerByField("Scale"), (List<Double>) tuple.getValueByField("Feature"));
         if(buffer.get(key).size()>=n){
-            System.out.println("[  ScaleMerge  ]"+key+"\n"+" number "+String.valueOf(buffer.get(key).size()));
             List<Double> feature = new ArrayList<>();
             Iterator<Map.Entry<Integer,List<Double>>> p = buffer.get(key).entrySet().iterator();
             for(;p.hasNext();){
