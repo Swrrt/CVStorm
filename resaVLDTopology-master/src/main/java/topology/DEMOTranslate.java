@@ -810,6 +810,112 @@ public class DEMOTranslate {
                     i++;
                     j = i;
                 } while (true);
+            }else if(x.substring(0,6).contains("VALVE ")){
+
+                int numberin,numberout;
+
+                String name;
+
+                int i=6,j=6;
+
+                while(x.charAt(i)!=' ')i++;
+
+                numberin = Integer.parseInt(x.substring(j,i));
+
+                i++;
+
+                j=i;
+
+                while(x.charAt(i)!=' ')i++;
+
+                numberout = Integer.parseInt(x.substring(j,i));
+
+                i++;
+
+                j=i;
+
+                while(x.charAt(i)!='=')i++;
+
+                name = x.substring(j,i);
+
+                BoltDeclarer xx = builder.setBolt(name, new ValveBolt(numberin,numberout), 1);
+
+                i++;
+
+                j = i;
+
+                do {
+
+                    if (i >= x.length()) break;
+
+                    while (i < x.length() && x.charAt(i) != ',') {
+
+                        i++;
+
+                    }
+
+                    //System.out.println(x.substring(j,i));
+
+                    xx.fieldsGrouping(x.substring(j, i),new Fields("Filename","Pack","Frame","Patch","sPatch"));
+
+                    i++;
+
+                    j = i;
+
+                } while (true);
+
+            }else if(x.substring(0,6).contains("VALVES")){
+
+                int number,timeout;
+
+                String name,path,vname;
+
+                int i=7,j=7;
+
+                while(x.charAt(i)!=' ')i++;
+
+                timeout = Integer.parseInt(x.substring(j,i));
+
+                i++;
+
+                j=i;
+
+                while(x.charAt(i)!=' ')i++;
+
+                number = Integer.parseInt(x.substring(j,i));
+
+                i++;
+
+                j=i;
+
+                while(x.charAt(i)!=' ')i++;
+
+                vname = x.substring(j,i);
+
+                i++;
+
+                j=i;
+
+                while(x.charAt(i)!='=')i++;
+
+                name = x.substring(j,i);
+
+                SpoutDeclarer xx = builder.setSpout(name+"_virtual", new ValveVirtualSpout(timeout,number));
+
+                i+=2;
+
+                j = i;
+
+                while(x.charAt(i)!='"')i++;
+
+                path= x.substring(j,i);
+
+                BoltDeclarer x1 = builder.setBolt(name,new ValveSpoutBolt(path),1);
+
+                x1.shuffleGrouping(name+"_virtual");
+
+                x1.shuffleGrouping(vname);
+
             }
         }
         conf.put(Config.TOPOLOGY_DEBUG, false);
