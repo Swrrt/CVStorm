@@ -44,6 +44,7 @@ public class ImageReadSpout extends BaseRichSpout {
     }
     @Override
     public void nextTuple(){
+	if(x==0)try{Thread.sleep(5000);}catch(Exception e){}
         if(x<files.length){
             if(files[x].exists()){
                 opencv_core.Mat img = opencv_highgui.imread(path+files[x].getName());
@@ -95,7 +96,7 @@ public class ImageReadSpout extends BaseRichSpout {
 		x++;
             }
         }
-	if(x%45==0)try{Thread.sleep(6000);}catch(Exception e){}
+	if(x%45==0)try{Thread.sleep(5500);}catch(Exception e){}
     }
     @Override
     public void declareOutputFields(OutputFieldsDeclarer outputFieldsDeclarer){

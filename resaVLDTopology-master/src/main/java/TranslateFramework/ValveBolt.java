@@ -64,7 +64,7 @@ public class ValveBolt extends BaseRichBolt{
 
             x=0;
 
-            collector.emit("Control", new Values(in));
+            collector.emit(new Values(in));
 
         }
 

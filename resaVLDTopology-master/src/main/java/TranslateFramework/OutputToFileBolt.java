@@ -9,6 +9,7 @@ import backtype.storm.tuple.Tuple;
 import java.io.FileWriter;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalTime;
 import org.bytedeco.javacpp.opencv_highgui;
 import org.bytedeco.javacpp.opencv_core;
 /**
@@ -37,7 +38,7 @@ public class OutputToFileBolt extends BaseRichBolt {
         if(tuple.contains("F_type"))name = name + tuple.getStringByField("F_type");
         name = name + String.valueOf(tuple.getIntegerByField("Pack")) + "_" + String.valueOf(tuple.getIntegerByField("Frame"))+ "_"
                 + String.valueOf(tuple.getIntegerByField("Patch")) + "_"+String.valueOf(tuple.getIntegerByField("Scale"))+"_"+String.valueOf(tuple.getIntegerByField("sPatch")) + ".txt";
-        System.out.println("[ Output ] "+path+name);
+        System.out.println("[ Output ] "+path+name+LocalTime.now());
         if(tuple.contains("Image")) {
             opencv_highgui.imwrite(path+name.substring(0,name.length()-4)+".jpg",((tool.Serializable.Mat)tuple.getValueByField("Image")).toJavaCVMat());
         }else {
